@@ -1,31 +1,36 @@
-var express = require('express')
+var express = require('express') // node_modules 내 express 관련 코드를 가져온다
 var app = express()
-var cors = require('cors')
+var cors = require('cors') 
+var logger = require('morgan')
 
-var corsOptions = {
-  origin: 'http://127.0.0.1:5501',
-  credentials: true 
+var corsOptions = { // CORS 옵션
+    origin: 'http://127.0.0.1:5501',
+    credentials: true
 }
 
-app.use(cors(corsOptions))
+app.use(cors(corsOptions)) // CORS 설정
+app.use(express.json()) // request body 파싱
+app.use(logger('tiny')) // Logger 설정 
 
-app.get('/hello', (req, res) => {
+app.get('/hello', (req, res) => { // URL 응답 테스트
   res.json('hello world !')
 })
-
-app.get('/error', (req, res) => {
+app.post('/hello', (req, res) => { // POST 요청 테스트 
+  console.log(req.body)
+  res.json({ userId: req.body.userId, email: req.body.email })
+})
+app.get('/error', (req, res) => { // 오류 테스트 
   throw new Error('서버에 치명적인 에러가 발생했습니다.')
 })
 
 // 폴백 핸들러 (fallback handler)
-app.use( (req, res, next) => {
-  res.status(404).send("Sorry can't find your page !")
+app.use( (req, res, next) => {  // 사용자가 요청한 페이지가 없는 경우 에러처리
+    res.status(404).send("Sorry can't find page")
 })
-app.use( (err, req, res, next) => {
-  console.error(err.stack)
-  res.status(500).send('something is broken on server !')
+app.use( (err, req, res, next) => { // 서버 내부 오류 처리
+    console.error(err.stack)
+    res.status(500).send("something is broken on server !")
 })
-
-app.listen(5000, () => {
-  console.log('server is running on port 5000...')
+app.listen(5000, () => { // 5000 포트로 서버 오픈
+    console.log('server is running on port 5000 ...')
 })
