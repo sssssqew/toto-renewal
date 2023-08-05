@@ -2,11 +2,16 @@ var express = require('express') // node_modules 내 express 관련 코드를 �
 var app = express()
 var cors = require('cors') 
 var logger = require('morgan')
+var mongoose = require('mongoose')
 
 var corsOptions = { // CORS 옵션
     origin: 'http://127.0.0.1:5501',
     credentials: true
 }
+const CONNECT_URL = 'mongodb://localhost:27017/syleemomo'
+mongoose.connect(CONNECT_URL)
+.then(() => console.log("mongodb connected ..."))
+.catch(e => console.log(`failed to connect mongodb: ${e}`))
 
 app.use(cors(corsOptions)) // CORS 설정
 app.use(express.json()) // request body 파싱
