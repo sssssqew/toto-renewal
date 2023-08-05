@@ -4,7 +4,8 @@ var cors = require('cors')
 var logger = require('morgan')
 var mongoose = require('mongoose')
 var axios = require('axios')
-var user = require('./src/models/User')
+var usersRouter = require('./src/routes/users')
+var todosRouter = require('./src/routes/todos')
 
 var corsOptions = { // CORS 옵션
     origin: 'http://127.0.0.1:5501',
@@ -18,6 +19,9 @@ mongoose.connect(CONNECT_URL)
 app.use(cors(corsOptions)) // CORS 설정
 app.use(express.json()) // request body 파싱
 app.use(logger('tiny')) // Logger 설정 
+
+app.use('/api/users', usersRouter) // User 라우터
+app.use('/api/todos', todosRouter) // Todo 라우터
 
 app.get('/hello', (req, res) => { // URL 응답 테스트
   res.json('hello world !')
