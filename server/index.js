@@ -1,8 +1,16 @@
 var express = require('express')
 var app = express()
+var cors = require('cors')
+
+var corsOptions = {
+  origin: 'http://127.0.0.1:5501',
+  credentials: true 
+}
+
+app.use(cors(corsOptions))
 
 app.get('/hello', (req, res) => {
-  res.send('hello world !')
+  res.json('hello world !')
 })
 
 app.get('/error', (req, res) => {
