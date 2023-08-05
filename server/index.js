@@ -3,6 +3,7 @@ var app = express()
 var cors = require('cors') 
 var logger = require('morgan')
 var mongoose = require('mongoose')
+var axios = require('axios')
 
 var corsOptions = { // CORS 옵션
     origin: 'http://127.0.0.1:5501',
@@ -26,6 +27,10 @@ app.post('/hello', (req, res) => { // POST 요청 테스트
 })
 app.get('/error', (req, res) => { // 오류 테스트 
   throw new Error('서버에 치명적인 에러가 발생했습니다.')
+})
+app.get('/fetch', async (req, res) => {
+  const response = await axios.get('https://jsonplaceholder.typicode.com/todos')
+  res.send(response.data)
 })
 
 // 폴백 핸들러 (fallback handler)
