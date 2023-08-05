@@ -4,6 +4,7 @@ var cors = require('cors')
 var logger = require('morgan')
 var mongoose = require('mongoose')
 var axios = require('axios')
+var user = require('./src/models/User')
 
 var corsOptions = { // CORS 옵션
     origin: 'http://127.0.0.1:5501',
