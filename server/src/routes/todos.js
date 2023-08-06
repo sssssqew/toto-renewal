@@ -79,8 +79,21 @@ router.put('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
   }
 }))
 
-router.delete('/:id', (req, res, next) => {
-  res.json("특정 할일 삭제")
-})
+// isAuth : 특정 할일을 삭제할 권한이 있는지 검사하는 미들웨어 
+router.delete('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
+  const todo = await Todo.findOne({ 
+    author: req.user._id,  // req.user 는 isAuth 에서 전달된 값
+    _id: req.params.id // TODO id 
+  })
+  if(!todo){
+    res.status(404).json({ code: 404, message: 'Todo Not Found '})
+  }else{
+    await Todo.deleteOne({ 
+      author: req.user._id,  // req.user 는 isAuth 에서 전달된 값
+      _id: req.params.id // TODO id 
+    })
+    res.status(204).json({ code: 204, message: 'TODO deleted successfully !' })
+  }
+}))
 
 module.exports = router 
