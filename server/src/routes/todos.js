@@ -5,14 +5,28 @@ const { isAuth } = require('../../auth')
 
 const router = express.Router()
 
+// isAuth : 전체 할일목록을 조회할 권한이 있는지 검사하는 미들웨어 
+router.get('/', isAuth, expressAsyncHandler(async (req, res, next) => {
+  const todos = await Todo.find({ author: req.user._id }) // req.user 는 isAuth 에서 전달된 값
+  if(todos.length === 0){
+    res.status(404).json({ code: 404, message: 'Fail to find todos !'})
+  }else{
+    res.json({ code: 200, todos })
+  }
+}))
 
-router.get('/', (req, res, next) => {
-  res.json("전체 할일목록 조회")
-})
-
-router.get('/:id', (req, res, next) => {
-  res.json("특정 할일 조회")
-})
+// isAuth : 특정 할일을 조회할 권한이 있는지 검사하는 미들웨어 
+router.get('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
+  const todo = await Todo.findOne({ 
+    author: req.user._id,  // req.user 는 isAuth 에서 전달된 값
+    _id: req.params.id // TODO id 
+  })
+  if(!todo){
+    res.status(404).json({ code: 404, message: 'Todo Not Found '})
+  }else{
+    res.json({ code: 200, todo })
+  }
+}))
 
 // isAuth : 새로운 할일을 생성할 권한이 있는지 검사하는 미들웨어 
 router.post('/', isAuth, expressAsyncHandler(async (req, res, next) => {
