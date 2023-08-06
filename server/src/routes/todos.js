@@ -55,9 +55,29 @@ router.post('/', isAuth, expressAsyncHandler(async (req, res, next) => {
   }
 }))
 
-router.put('/:id', (req, res, next) => {
-  res.json("특정 할일 변경")
-})
+// isAuth : 특정 할일을 변경할 권한이 있는지 검사하는 미들웨어 
+router.put('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
+  const todo = await Todo.findOne({ 
+    author: req.user._id,  // req.user 는 isAuth 에서 전달된 값
+    _id: req.params.id // TODO id 
+  })
+  if(!todo){
+    res.status(404).json({ code: 404, message: 'Todo Not Found '})
+  }else{
+    todo.title = req.body.title || todo.title
+    todo.description = req.body.description || todo.description
+    todo.isDone = req.body.isDone || todo.isDone
+    todo.lastModifiedAt = new Date() // 수정시각 업데이트
+    todo.finishedAt = todo.isDone ? todo.lastModifiedAt : todo.finishedAt
+    
+    const updatedTodo = await todo.save()
+    res.json({
+      code: 200,
+      message: 'TODO Updated',
+      updatedTodo
+    })
+  }
+}))
 
 router.delete('/:id', (req, res, next) => {
   res.json("특정 할일 삭제")
