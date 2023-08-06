@@ -67,8 +67,14 @@ router.put('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
   }
 }))
 
-router.delete('/:id', (req, res, next) => {
-  res.json("사용자정보 삭제")
-})
+// isAuth : 사용자를 삭제할 권한이 있는지 검사하는 미들웨어 
+router.delete('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user) {
+    res.status(404).json({ code: 404, message: 'User Not Founded'})
+  }else{
+    res.status(204).json({ code: 204, message: 'User deleted successfully !' })
+  } 
+}))
 
 module.exports = router 
