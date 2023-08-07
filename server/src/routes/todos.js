@@ -41,6 +41,8 @@ router.post('/', isAuth, expressAsyncHandler(async (req, res, next) => {
       author: req.user._id, // 사용자 id
       title: req.body.title,
       description: req.body.description,
+      category: req.body.category,
+      imgUrl: req.body.imgUrl
     })
     const newTodo = await todo.save()
     if(!newTodo){
@@ -67,6 +69,8 @@ router.put('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
     todo.title = req.body.title || todo.title
     todo.description = req.body.description || todo.description
     todo.isDone = req.body.isDone || todo.isDone
+    todo.category = req.body.category || todo.category
+    todo.imgUrl = req.body.imgUrl || todo.imgUrl
     todo.lastModifiedAt = new Date() // 수정시각 업데이트
     todo.finishedAt = todo.isDone ? todo.lastModifiedAt : todo.finishedAt
     
