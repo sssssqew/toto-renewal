@@ -7,7 +7,7 @@ const router = express.Router()
 
 // isAuth : 전체 할일목록을 조회할 권한이 있는지 검사하는 미들웨어 
 router.get('/', isAuth, expressAsyncHandler(async (req, res, next) => {
-  const todos = await Todo.find({ author: req.user._id }) // req.user 는 isAuth 에서 전달된 값
+  const todos = await Todo.find({ author: req.user._id }).populate('author') // req.user 는 isAuth 에서 전달된 값
   if(todos.length === 0){
     res.status(404).json({ code: 404, message: 'Fail to find todos !'})
   }else{

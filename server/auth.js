@@ -28,9 +28,10 @@ const isAuth = (req, res, next) => { // 권한확인
         res.status(419).json({ code: 419, message: 'token expired !'})
       }else if(err){
         res.status(401).json({ code: 401, message: 'Invalid Token !'})
+      }else{
+        req.user = userInfo
+        next()
       }
-      req.user = userInfo
-      next()
     })
   }
 }
