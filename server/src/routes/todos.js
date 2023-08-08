@@ -2,6 +2,8 @@ const express = require('express')
 const Todo = require('../models/Todo') 
 const expressAsyncHandler = require('express-async-handler') 
 const { isAuth } = require('../../auth')
+const mongoose = require('mongoose')
+const { Types: { ObjectId } } = mongoose
 
 const router = express.Router()
 
@@ -145,7 +147,7 @@ router.get('/group/date/:field', isAuth, expressAsyncHandler(async (req, res, ne
 router.get('/group/mine/:field', isAuth, expressAsyncHandler(async (req, res, next) => { // 대쉬보드
   const docs = await Todo.aggregate([
     {
-      $match: { author: req.user._id }
+      $match: { author: new ObjectId(req.user._id) }
     },
     {
       $group: {
@@ -164,7 +166,7 @@ router.get('/group/mine/date/:field', isAuth, expressAsyncHandler(async (req, re
   if(req.params.field === 'createdAt' || req.params.field === 'lastModifiedAt' || req.params.field === 'finishedAt'){
     const docs = await Todo.aggregate([
       {
-        $match: { author: req.user._id }
+        $match: { author: new ObjectId(req.user._id) }
       },
       {
         $group: {
