@@ -100,4 +100,87 @@ router.delete('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
   }
 }))
 
+router.get('/group/:field', isAuth, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
+  if(!req.user.isAdmin){
+    res.status(401).json({ code: 401, message: 'You are not authorized to use this service !'})
+  }else{
+    const docs = await Todo.aggregate([
+      {
+        $group: {
+          _id: `$${req.params.field}`,
+          count: { $sum: 1 }
+        }
+      }
+    ])
+    
+    console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
+    docs.sort((d1, d2) => d1._id - d2._id)
+    res.json({ code: 200, docs})
+  }
+}))
+
+router.get('/group/date/:field', isAuth, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
+  if(!req.user.isAdmin){
+    res.status(401).json({ code: 401, message: 'You are not authorized to use this service !'})
+  }else{
+    if(req.params.field === 'createdAt' || req.params.field === 'lastModifiedAt' || req.params.field === 'finishedAt'){
+      const docs = await Todo.aggregate([
+        {
+          $group: {
+            _id: { year: { $year: `$${req.params.field}` }, month: { $month: `$${req.params.field}` } },
+            count: { $sum: 1 }
+          }
+        }
+      ])
+      
+      console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
+      docs.sort((d1, d2) => d1._id - d2._id)
+      res.json({ code: 200, docs})
+    }else{
+      res.status(204).json({ code: 204, message: 'No Content'})
+    }
+  }
+}))
+
+router.get('/group/mine/:field', isAuth, expressAsyncHandler(async (req, res, next) => { // 대쉬보드
+  const docs = await Todo.aggregate([
+    {
+      $match: { author: req.user._id }
+    },
+    {
+      $group: {
+        _id: `$${req.params.field}`,
+        count: { $sum: 1 }
+      }
+    }
+  ])
+  
+  console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
+  docs.sort((d1, d2) => d1._id - d2._id)
+  res.json({ code: 200, docs})
+}))
+
+router.get('/group/mine/date/:field', isAuth, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
+  if(req.params.field === 'createdAt' || req.params.field === 'lastModifiedAt' || req.params.field === 'finishedAt'){
+    const docs = await Todo.aggregate([
+      {
+        $match: { author: req.user._id }
+      },
+      {
+        $group: {
+          _id: { year: { $year: `$${req.params.field}` }, month: { $month: `$${req.params.field}` } },
+          count: { $sum: 1 }
+        }
+      }
+    ])
+    
+    console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
+    docs.sort((d1, d2) => d1._id - d2._id)
+    res.json({ code: 200, docs})
+  }else{
+    res.status(204).json({ code: 204, message: 'No Content'})
+  }
+}))
+
+
 module.exports = router 
