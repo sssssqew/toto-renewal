@@ -1,14 +1,14 @@
-var express = require('express') // node_modules 내 express 관련 코드를 가져온다
-var app = express()
-var cors = require('cors') 
-var logger = require('morgan')
-var mongoose = require('mongoose')
-var axios = require('axios')
-var usersRouter = require('./src/routes/users')
-var todosRouter = require('./src/routes/todos')
-var config = require('./config')
+const express = require('express') // node_modules 내 express 관련 코드를 가져온다
+const app = express()
+const cors = require('cors') 
+const logger = require('morgan')
+const mongoose = require('mongoose')
+const axios = require('axios')
+const usersRouter = require('./src/routes/users')
+const todosRouter = require('./src/routes/todos')
+const config = require('./config')
 
-var corsOptions = { // CORS 옵션
+const corsOptions = { // CORS 옵션
     origin: 'http://127.0.0.1:5501',
     credentials: true
 }
