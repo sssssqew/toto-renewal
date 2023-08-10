@@ -1,7 +1,7 @@
 const express = require('express')
 const Todo = require('../models/Todo') 
 const expressAsyncHandler = require('express-async-handler') 
-const { isAuth } = require('../../auth')
+const { isAuth, isAdmin } = require('../../auth')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
 
@@ -102,46 +102,38 @@ router.delete('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
   }
 }))
 
-router.get('/group/:field', isAuth, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
-  if(!req.user.isAdmin){
-    res.status(401).json({ code: 401, message: 'You are not authorized to use this service !'})
-  }else{
+router.get('/group/:field', isAuth, isAdmin, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
+  const docs = await Todo.aggregate([
+    {
+      $group: {
+        _id: `$${req.params.field}`,
+        count: { $sum: 1 }
+      }
+    }
+  ])
+  
+  console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
+  docs.sort((d1, d2) => d1._id - d2._id)
+  res.json({ code: 200, docs})
+}))
+
+router.get('/group/date/:field', isAuth, isAdmin, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
+  if(req.params.field === 'createdAt' || req.params.field === 'lastModifiedAt' || req.params.field === 'finishedAt'){
     const docs = await Todo.aggregate([
       {
         $group: {
-          _id: `$${req.params.field}`,
+          _id: { year: { $year: `$${req.params.field}` }, month: { $month: `$${req.params.field}` } },
           count: { $sum: 1 }
         }
-      }
+      },
+      { $sort : { _id : 1 } } // 날짜 오름차순 정렬
     ])
     
     console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
     docs.sort((d1, d2) => d1._id - d2._id)
     res.json({ code: 200, docs})
-  }
-}))
-
-router.get('/group/date/:field', isAuth, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
-  if(!req.user.isAdmin){
-    res.status(401).json({ code: 401, message: 'You are not authorized to use this service !'})
   }else{
-    if(req.params.field === 'createdAt' || req.params.field === 'lastModifiedAt' || req.params.field === 'finishedAt'){
-      const docs = await Todo.aggregate([
-        {
-          $group: {
-            _id: { year: { $year: `$${req.params.field}` }, month: { $month: `$${req.params.field}` } },
-            count: { $sum: 1 }
-          }
-        },
-        { $sort : { _id : 1 } } // 날짜 오름차순 정렬
-      ])
-      
-      console.log(`Number Of Group: ${docs.length}`) // 그룹 갯수
-      docs.sort((d1, d2) => d1._id - d2._id)
-      res.json({ code: 200, docs})
-    }else{
-      res.status(204).json({ code: 204, message: 'No Content'})
-    }
+    res.status(204).json({ code: 204, message: 'No Content'})
   }
 }))
 
