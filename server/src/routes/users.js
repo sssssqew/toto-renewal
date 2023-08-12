@@ -49,8 +49,8 @@ router.post('/logout', (req, res, next) => {
 })
 
 // isAuth : 사용자를 수정할 권한이 있는지 검사하는 미들웨어 
-router.put('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.id)
+router.put('/', isAuth, expressAsyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user._id)
   if(!user){
     res.status(404).json({ code: 404, message: 'User Not Founded'})
   }else{
@@ -71,8 +71,8 @@ router.put('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
 }))
 
 // isAuth : 사용자를 삭제할 권한이 있는지 검사하는 미들웨어 
-router.delete('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
-  const user = await User.findByIdAndDelete(req.params.id);
+router.delete('/', isAuth, expressAsyncHandler(async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.user._id);
   if (!user) {
     res.status(404).json({ code: 404, message: 'User Not Founded'})
   }else{
