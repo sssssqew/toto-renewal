@@ -4,6 +4,7 @@ const cors = require('cors')
 const logger = require('morgan')
 const mongoose = require('mongoose')
 const axios = require('axios')
+
 const usersRouter = require('./src/routes/users')
 const todosRouter = require('./src/routes/todos')
 const config = require('./config')
@@ -19,6 +20,7 @@ mongoose.connect(config.MONGODB_URL)
 
 app.use(cors(corsOptions)) // CORS 설정
 app.use(express.json()) // request body 파싱
+app.use(express.urlencoded({ extended: false }))
 app.use(logger('tiny')) // Logger 설정 
 
 app.use('/api/users', usersRouter) // User 라우터

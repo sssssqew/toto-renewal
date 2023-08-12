@@ -2,6 +2,7 @@ const express = require('express')
 const User = require('../models/User') 
 const expressAsyncHandler = require('express-async-handler') 
 const { generateToken, isAuth } = require('../../auth')
+const { limitUsage } = require('../../limiter')
 const { validationResult } = require('express-validator')
 const {
     validateUserName,
@@ -11,7 +12,7 @@ const {
 
 const router = express.Router()
 
-router.post('/register', [
+router.post('/register', limitUsage, [
   validateUserName(),
   validateUserEmail(),
   validateUserPassword()
@@ -46,7 +47,7 @@ router.post('/register', [
   }
 }))
 
-router.post('/login', [
+router.post('/login', limitUsage, [
   validateUserEmail(),
   validateUserPassword()
 ] , expressAsyncHandler(async (req, res, next) => {
@@ -82,11 +83,11 @@ router.post('/logout', (req, res, next) => {
 })
 
 // isAuth : 사용자를 수정할 권한이 있는지 검사하는 미들웨어 
-router.put('/', isAuth, [
+router.put('/', limitUsage, [
   validateUserName(),
   validateUserEmail(),
   validateUserPassword()
-], expressAsyncHandler(async (req, res, next) => {
+], isAuth, expressAsyncHandler(async (req, res, next) => {
   const errors = validationResult(req)
   if(!errors.isEmpty()){
     console.log(errors.array())
@@ -118,7 +119,7 @@ router.put('/', isAuth, [
 }))
 
 // isAuth : 사용자를 삭제할 권한이 있는지 검사하는 미들웨어 
-router.delete('/', isAuth, expressAsyncHandler(async (req, res, next) => {
+router.delete('/', limitUsage, isAuth, expressAsyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndDelete(req.user._id)
   if (!user) {
     res.status(404).json({ code: 404, message: 'User Not Founded'})

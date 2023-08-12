@@ -1,6 +1,7 @@
 const express = require('express')
 const Todo = require('../models/Todo') 
 const expressAsyncHandler = require('express-async-handler') 
+const { limitUsage } = require('../../limiter')
 const { isAuth, isAdmin } = require('../../auth')
 const mongoose = require('mongoose')
 const { Types: { ObjectId } } = mongoose
@@ -14,7 +15,7 @@ const {
 const router = express.Router()
 
 // isAuth : 전체 할일목록을 조회할 권한이 있는지 검사하는 미들웨어 
-router.get('/', isAuth, expressAsyncHandler(async (req, res, next) => {
+router.get('/', limitUsage, isAuth, expressAsyncHandler(async (req, res, next) => {
   const todos = await Todo.find({ author: req.user._id }).populate('author') // req.user 는 isAuth 에서 전달된 값
   if(todos.length === 0){
     res.status(404).json({ code: 404, message: 'Fail to find todos !'})
@@ -24,7 +25,7 @@ router.get('/', isAuth, expressAsyncHandler(async (req, res, next) => {
 }))
 
 // isAuth : 특정 할일을 조회할 권한이 있는지 검사하는 미들웨어 
-router.get('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
+router.get('/:id', limitUsage, isAuth, expressAsyncHandler(async (req, res, next) => {
   const todo = await Todo.findOne({ 
     author: req.user._id,  // req.user 는 isAuth 에서 전달된 값
     _id: req.params.id // TODO id 
@@ -37,7 +38,7 @@ router.get('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
 }))
 
 // isAuth : 새로운 할일을 생성할 권한이 있는지 검사하는 미들웨어 
-router.post('/', [
+router.post('/', limitUsage, [
   validateTodoTitle(),
   validateTodoDescription(),
   validateTodoCategory()
@@ -80,7 +81,7 @@ router.post('/', [
 }))
 
 // isAuth : 특정 할일을 변경할 권한이 있는지 검사하는 미들웨어 
-router.put('/:id', [
+router.put('/:id', limitUsage, [
   validateTodoTitle(),
   validateTodoDescription(),
   validateTodoCategory()
@@ -120,7 +121,7 @@ router.put('/:id', [
 }))
 
 // isAuth : 특정 할일을 삭제할 권한이 있는지 검사하는 미들웨어 
-router.delete('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
+router.delete('/:id', limitUsage, isAuth, expressAsyncHandler(async (req, res, next) => {
   const todo = await Todo.findOne({ 
     author: req.user._id,  // req.user 는 isAuth 에서 전달된 값
     _id: req.params.id // TODO id 
@@ -136,7 +137,7 @@ router.delete('/:id', isAuth, expressAsyncHandler(async (req, res, next) => {
   }
 }))
 
-router.get('/group/:field', isAuth, isAdmin, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
+router.get('/group/:field', limitUsage, isAuth, isAdmin, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
   const docs = await Todo.aggregate([
     {
       $group: {
@@ -151,7 +152,7 @@ router.get('/group/:field', isAuth, isAdmin, expressAsyncHandler(async (req, res
   res.json({ code: 200, docs})
 }))
 
-router.get('/group/date/:field', isAuth, isAdmin, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
+router.get('/group/date/:field', limitUsage, isAuth, isAdmin, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
   if(req.params.field === 'createdAt' || req.params.field === 'lastModifiedAt' || req.params.field === 'finishedAt'){
     const docs = await Todo.aggregate([
       {
@@ -171,7 +172,7 @@ router.get('/group/date/:field', isAuth, isAdmin, expressAsyncHandler(async (req
   }
 }))
 
-router.get('/group/mine/:field', isAuth, expressAsyncHandler(async (req, res, next) => { // 대쉬보드
+router.get('/group/mine/:field', limitUsage, isAuth, expressAsyncHandler(async (req, res, next) => { // 대쉬보드
   const docs = await Todo.aggregate([
     {
       $match: { author: new ObjectId(req.user._id) }
@@ -189,7 +190,7 @@ router.get('/group/mine/:field', isAuth, expressAsyncHandler(async (req, res, ne
   res.json({ code: 200, docs})
 }))
 
-router.get('/group/mine/date/:field', isAuth, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
+router.get('/group/mine/date/:field', limitUsage, isAuth, expressAsyncHandler(async (req, res, next) => { // 어드민 페이지
   if(req.params.field === 'createdAt' || req.params.field === 'lastModifiedAt' || req.params.field === 'finishedAt'){
     const docs = await Todo.aggregate([
       {
