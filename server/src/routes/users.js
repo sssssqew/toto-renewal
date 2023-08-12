@@ -49,7 +49,7 @@ router.post('/register', [
 router.post('/login', [
   validateUserEmail(),
   validateUserPassword()
-] ,expressAsyncHandler(async (req, res, next) => {
+] , expressAsyncHandler(async (req, res, next) => {
   const errors = validationResult(req)
   console.log(req.body)
   if(!errors.isEmpty()){
