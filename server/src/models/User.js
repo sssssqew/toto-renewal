@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const moment = require("moment")
 
 const { Schema } = mongoose
 
@@ -33,6 +34,16 @@ const userSchema = new Schema({ // 스키마 정의
     default: Date.now,
   }
 }) 
+
+userSchema.virtual('status').get(function () {
+  return this.isAdmin ? "관리자" : "사용자"
+})
+userSchema.virtual('createdAgo').get(function () {
+  return moment(this.createdAt).fromNow() // day ago
+})
+userSchema.virtual('lastModifiedAgo').get(function () {
+  return moment(this.lastModifiedAt).fromNow() // day ago
+})
 
 const User = mongoose.model('User', userSchema)
 module.exports = User
