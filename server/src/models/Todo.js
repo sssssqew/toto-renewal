@@ -47,11 +47,14 @@ const todoSchema = new Schema({ // 스키마 정의
   }
 })
 
+todoSchema.path('category').validate(function(value){
+  return /오락|공부|음식|자기계발|업무|패션|여행/.test(value)
+}, 'category `{VALUE}` 는 유효하지 않은 카테고리입니다.')
+
 // 가공해서 보여줄 필드
 todoSchema.virtual('status').get(function () {
   return this.isDone ? "종료" : "진행중"
 })
-
 todoSchema.virtual('createdAgo').get(function () {
   return moment(this.createdAt).fromNow() // day ago
 })

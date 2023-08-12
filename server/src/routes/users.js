@@ -72,7 +72,7 @@ router.put('/', isAuth, expressAsyncHandler(async (req, res, next) => {
 
 // isAuth : 사용자를 삭제할 권한이 있는지 검사하는 미들웨어 
 router.delete('/', isAuth, expressAsyncHandler(async (req, res, next) => {
-  const user = await User.findByIdAndDelete(req.user._id);
+  const user = await User.findByIdAndDelete(req.user._id)
   if (!user) {
     res.status(404).json({ code: 404, message: 'User Not Founded'})
   }else{
