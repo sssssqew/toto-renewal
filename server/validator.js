@@ -40,6 +40,10 @@ const validateUserPassword = () => {
   .withMessage("Passwords don't match.")
 }
 
+const validateUserId = () => {
+  return isFieldEmpty("userId")
+}
+
 const validateTodoTitle = () => {
   return isFieldEmpty("title")
   .isLength({ min: 2, max: 20 }) // 2~20자
@@ -60,6 +64,7 @@ module.exports = {
     validateUserName,
     validateUserEmail,
     validateUserPassword,
+    validateUserId,
     validateTodoTitle,
     validateTodoDescription,
     validateTodoCategory

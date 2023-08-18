@@ -7,6 +7,7 @@ const { validationResult } = require('express-validator')
 const {
     validateUserName,
     validateUserEmail,
+    validateUserId,
     validateUserPassword
 } = require('../../validator')
 
@@ -15,6 +16,7 @@ const router = express.Router()
 router.post('/register', limitUsage, [
   validateUserName(),
   validateUserEmail(),
+  validateUserId(),
   validateUserPassword()
 ], expressAsyncHandler(async (req, res, next) => {
   const errors = validationResult(req)
@@ -27,11 +29,17 @@ router.post('/register', limitUsage, [
           error: errors.array()
       })
   }else{
+    const UserToRegister = await User.findOne({
+      email: req.body.email 
+    })
+    if(UserToRegister){
+      res.status(401).json({ code: 401, message: 'You are already registered before ! Please log in.'})
+    }else{
       const user = new User({
-          name: req.body.name,
-          email: req.body.email,
-          userId: req.body.userId,
-          password: req.body.password
+        name: req.body.name,
+        email: req.body.email,
+        userId: req.body.userId,
+        password: req.body.password
       })
       const newUser = await user.save() // DB에 User 생성
       if(!newUser){
@@ -44,6 +52,7 @@ router.post('/register', limitUsage, [
               name, email, userId, isAdmin, createdAt
           })
       }
+    }
   }
 }))
 
