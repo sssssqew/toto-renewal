@@ -124,7 +124,7 @@ router.post('/logout', limitUsage, isAuth, expressAsyncHandler(async (req, res, 
 }))
 
 
-// isAuth : 사용자를 수정할 권한이 있는지 검사하는 미들웨어 
+// isAuth : 사용자 정보를 수정할 권한이 있는지 검사하는 미들웨어 
 router.put('/', limitUsage, [
   validateUserName(),
   validateUserEmail(),
@@ -148,7 +148,6 @@ router.put('/', limitUsage, [
       user.email = req.body.email || user.email
       user.userId = req.body.userId || user.userId // 사용자 아이디 수정가능
       user.password = req.body.password || user.password
-      user.isAdmin = req.body.isAdmin ?? user.isAdmin // req.body.isAdmin 이 null 또는 undefined 인 경우 기존값 사용
       user.lastModifiedAt = new Date() // 수정시각 업데이트
       
       const updatedUser = await user.save()
@@ -181,5 +180,35 @@ router.delete('/', limitUsage, isAuth, expressAsyncHandler(async (req, res, next
     res.status(204).json({ code: 204, message: 'User deleted successfully !' })
   } 
 }))
+
+// 관리자만 일반 사용자의 관리자 권한 부여 가능
+router.put('/isAdmin', limitUsage, validateUserEmail(), isAuth, isAdmin, expressAsyncHandler(async (req, res, next) => {
+  const errors = validationResult(req)
+  if(!errors.isEmpty()){
+    console.log(errors.array())
+    res.status(400).json({ 
+        code: 400, 
+        message: 'Invalid Form data for user',
+        error: errors.array()
+    })
+  }else{
+    const user = await User.findOne({ email: req.body.email })
+    if(!user){
+      res.status(404).json({ code: 404, message: 'User Not Founded'})
+    }else{
+      user.isAdmin = req.body.isAdmin ?? user.isAdmin // req.body.isAdmin 이 null 또는 undefined 인 경우 기존값 사용
+      user.lastModifiedAt = new Date() // 수정시각 업데이트
+
+      const updatedUser = await user.save()
+      const { name, email, userId, isAdmin, createdAt } = updatedUser
+
+      res.json({
+        code: 200,
+        name, email, userId, isAdmin, createdAt,
+        message: `User ${name} admin state updated into ${isAdmin} successfully !`
+      })
+    }
+  }
+})) 
 
 module.exports = router 
