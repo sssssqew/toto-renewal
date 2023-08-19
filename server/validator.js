@@ -4,7 +4,7 @@ const isFieldEmpty = (field) => { // Form 필드가 비어있는지 검사
     return body(field)
     .not()
     .isEmpty()
-    .withMessage(`user ${field} is required`)
+    .withMessage(`${field} field is required`)
     .bail() // if email is empty, the following will not be run
     .trim() // 공백제거
 }
@@ -59,6 +59,9 @@ const validateTodoCategory = () => {
   .isIn(['오락', '공부', '음식', '자기계발', '업무', '패션', '여행'])
   .withMessage('todo category must be one of 오락 | 공부 | 음식 | 자기계발 | 업무 | 패션 | 여행')
 }
+const validateTodoImgUrl = () => {
+  return isFieldEmpty("imgUrl")
+}
 
 module.exports = {
     validateUserName,
@@ -67,5 +70,6 @@ module.exports = {
     validateUserId,
     validateTodoTitle,
     validateTodoDescription,
-    validateTodoCategory
+    validateTodoCategory,
+    validateTodoImgUrl
 }

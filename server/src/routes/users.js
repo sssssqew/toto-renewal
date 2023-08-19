@@ -1,5 +1,6 @@
 const express = require('express')
 const User = require('../models/User') 
+const Todo = require('../models/Todo') 
 const expressAsyncHandler = require('express-async-handler') 
 const { generateToken, isAuth, isAdmin } = require('../../auth')
 const { limitUsage } = require('../../limiter')
@@ -173,6 +174,9 @@ router.delete('/', limitUsage, isAuth, expressAsyncHandler(async (req, res, next
   if (!user) {
     res.status(404).json({ code: 404, message: 'User Not Founded'})
   }else{
+    // 사용자가 생성한 전체 할일목록 삭제
+    await Todo.deleteMany({ author: req.user._id }) // req.user 는 isAuth 에서 전달된 값
+
     res.clearCookie('token', {
       httpOnly: true, // 배포시 true
       secure: true, // 배포시 true

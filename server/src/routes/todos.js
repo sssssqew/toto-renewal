@@ -9,7 +9,8 @@ const { validationResult } = require('express-validator')
 const {
   validateTodoTitle,
   validateTodoDescription,
-  validateTodoCategory
+  validateTodoCategory,
+  validateTodoImgUrl
 } = require('../../validator')
 
 const router = express.Router()
@@ -41,7 +42,8 @@ router.get('/:id', limitUsage, isAuth, expressAsyncHandler(async (req, res, next
 router.post('/', limitUsage, [
   validateTodoTitle(),
   validateTodoDescription(),
-  validateTodoCategory()
+  validateTodoCategory(),
+  validateTodoImgUrl()
 ], isAuth, expressAsyncHandler(async (req, res, next) => {
   const errors = validationResult(req)
   if(!errors.isEmpty()){
