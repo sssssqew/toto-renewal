@@ -1,7 +1,7 @@
 const express = require('express')
 const User = require('../models/User') 
 const expressAsyncHandler = require('express-async-handler') 
-const { generateToken, isAuth } = require('../../auth')
+const { generateToken, isAuth, isAdmin } = require('../../auth')
 const { limitUsage } = require('../../limiter')
 const { validationResult } = require('express-validator')
 const {
@@ -12,6 +12,15 @@ const {
 } = require('../../validator')
 
 const router = express.Router()
+
+router.get('/', limitUsage, isAuth, isAdmin, expressAsyncHandler(async (req, res, next) => { // 관리자만 전체 사용자목록 보기
+  const users = await User.find({}, { _id:0, password:0, lastModifiedAt:0 }) // 전체 사용자목록 조회시 고유 ID, 비밀번호, 업데이트날짜 제외
+  if(users.length === 0){
+    res.status(404).json({ code: 404, message: 'Fail to find users !'})
+  }else{
+    res.json({ code: 200, users })
+  }
+}))
 
 router.post('/register', limitUsage, [
   validateUserName(),
@@ -102,7 +111,7 @@ router.post('/login', limitUsage, [
 }))
 
 router.post('/logout', limitUsage, isAuth, expressAsyncHandler(async (req, res, next) => {
-  const user = await User.findByIdAndDelete(req.user._id)
+  const user = await User.findById(req.user._id)
   if (!user) {
     res.status(404).json({ code: 404, message: 'User Not Founded'})
   }else{
@@ -113,6 +122,7 @@ router.post('/logout', limitUsage, isAuth, expressAsyncHandler(async (req, res, 
     res.status(200).json({ code: 200, message: 'User Logged out successfully !' })
   } 
 }))
+
 
 // isAuth : 사용자를 수정할 권한이 있는지 검사하는 미들웨어 
 router.put('/', limitUsage, [
@@ -158,7 +168,6 @@ router.put('/', limitUsage, [
     }
   }
 }))
-
 // isAuth : 사용자를 삭제할 권한이 있는지 검사하는 미들웨어 
 router.delete('/', limitUsage, isAuth, expressAsyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndDelete(req.user._id)

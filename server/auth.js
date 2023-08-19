@@ -79,10 +79,17 @@ const decrypt = (encryptedUser) => {
 
   const [_id, name, email, userId, isAdmin, createdAt] = decryptedUser
   
+  let isAdminBoolean = null
+  if(isAdmin === 'true'){
+    isAdminBoolean = true
+  }else if(isAdmin === 'false'){
+    isAdminBoolean = false 
+  }
+  
   return {
     _id: new ObjectId(_id),
     createdAt: new Date(createdAt),
-    isAdmin: Boolean(isAdmin),
+    isAdmin: isAdminBoolean,
     name, email, userId
   }
 }
