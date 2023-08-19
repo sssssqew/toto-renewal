@@ -46,10 +46,17 @@ router.post('/register', limitUsage, [
           res.status(401).json({ code: 401, message: 'Invalid User Data'})
       }else{
           const { name, email, userId, isAdmin, createdAt } = newUser 
+          const token = generateToken(newUser)
+
+          res.cookie('token', JSON.stringify(token), {
+            httpOnly: true, // 배포시 true
+            secure: true, // 배포시 true
+            expires: new Date(Date.now() + 24 * 3600000) // cookie will be removed after 24 hours
+          })
           res.json({
               code: 200,
-              token: generateToken(newUser),
-              name, email, userId, isAdmin, createdAt
+              token, name, email, userId, isAdmin, createdAt,
+              message: "You are registered successfully !"
           })
       }
     }
@@ -78,18 +85,34 @@ router.post('/login', limitUsage, [
       res.status(401).json({ code: 401, message: 'Invalid Email or Password' })
     }else{
       const { name, email, userId, isAdmin, createdAt } = loginUser 
+      const token = generateToken(loginUser)
+
+      res.cookie('token', JSON.stringify(token), {
+        httpOnly: true, // 배포시 true
+        secure: true, // 배포시 true
+        expires: new Date(Date.now() + 24 * 3600000) // cookie will be removed after 24 hours
+      })
       res.json({ 
         code: 200, 
-        token: generateToken(loginUser), 
-        name, email, userId, isAdmin, createdAt
+        token, name, email, userId, isAdmin, createdAt,
+        message: "You are Logged in successfully !"
       })
     }
   }
 }))
 
-router.post('/logout', (req, res, next) => {
-  res.json("로그아웃")
-})
+router.post('/logout', limitUsage, isAuth, expressAsyncHandler(async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.user._id)
+  if (!user) {
+    res.status(404).json({ code: 404, message: 'User Not Founded'})
+  }else{
+    res.clearCookie('token', {
+      httpOnly: true, // 배포시 true
+      secure: true, // 배포시 true
+    })
+    res.status(200).json({ code: 200, message: 'User Logged out successfully !' })
+  } 
+}))
 
 // isAuth : 사용자를 수정할 권한이 있는지 검사하는 미들웨어 
 router.put('/', limitUsage, [
@@ -113,15 +136,22 @@ router.put('/', limitUsage, [
       user.name = req.body.name || user.name 
       user.email = req.body.email || user.email
       user.password = req.body.password || user.password
-      user.isAdmin = req.body.isAdmin || user.isAdmin
+      user.isAdmin = req.body.isAdmin ?? user.isAdmin // req.body.isAdmin 이 null 또는 undefined 인 경우 기존값 사용
       user.lastModifiedAt = new Date() // 수정시각 업데이트
       
       const updatedUser = await user.save()
       const { name, email, userId, isAdmin, createdAt } = updatedUser
+      const token = generateToken(updatedUser)
+
+      res.cookie('token', JSON.stringify(token), {
+        httpOnly: true, // 배포시 true
+        secure: true, // 배포시 true
+        expires: new Date(Date.now() + 24 * 3600000) // cookie will be removed after 24 hours
+      })
       res.json({
         code: 200,
-        token: generateToken(updatedUser),
-        name, email, userId, isAdmin, createdAt
+        token, name, email, userId, isAdmin, createdAt,
+        message: "Your User Info. are updated successfully !"
       })
     }
   }
@@ -133,6 +163,10 @@ router.delete('/', limitUsage, isAuth, expressAsyncHandler(async (req, res, next
   if (!user) {
     res.status(404).json({ code: 404, message: 'User Not Founded'})
   }else{
+    res.clearCookie('token', {
+      httpOnly: true, // 배포시 true
+      secure: true, // 배포시 true
+    })
     res.status(204).json({ code: 204, message: 'User deleted successfully !' })
   } 
 }))

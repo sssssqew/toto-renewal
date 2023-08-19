@@ -102,11 +102,12 @@ const generateToken = (user) => { // 토큰 생성
 }
 
 const isAuth = (req, res, next) => { // 권한확인
-  const bearerToken = req.headers.authorization // 요청헤더에 저장된 토큰
-  if(!bearerToken){
+  console.log(req.cookies.token)
+  const token = JSON.parse(req.cookies.token) // 요청헤더에 저장된 토큰
+  if(!token){
     res.status(401).json({message: 'Token is not supplied'}) // 헤더에 토근이 없는 경우
   }else{
-    const token = bearerToken.slice(7, bearerToken.length) // Bearer 글자는 제거하고 jwt 토큰만 추출
+    // const token = bearerToken.slice(7, bearerToken.length) // Bearer 글자는 제거하고 jwt 토큰만 추출
     jwt.verify(token, config.JWT_SECRET, (err, userInfo) => {
       if(err && err.name === 'TokenExpiredError'){ // 토큰만료
         res.status(419).json({ code: 419, message: 'token expired !'})

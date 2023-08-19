@@ -104,7 +104,7 @@ router.put('/:id', limitUsage, [
     }else{
       todo.title = req.body.title || todo.title
       todo.description = req.body.description || todo.description
-      todo.isDone = req.body.isDone || todo.isDone
+      todo.isDone = req.body.isDone ?? todo.isDone
       todo.category = req.body.category || todo.category
       todo.imgUrl = req.body.imgUrl || todo.imgUrl
       todo.lastModifiedAt = new Date() // 수정시각 업데이트

@@ -4,13 +4,14 @@ const cors = require('cors')
 const logger = require('morgan')
 const mongoose = require('mongoose')
 const axios = require('axios')
+const cookieParser = require('cookie-parser')
 
 const usersRouter = require('./src/routes/users')
 const todosRouter = require('./src/routes/todos')
 const config = require('./config')
 
 const corsOptions = { // CORS 옵션
-    origin: 'http://127.0.0.1:5501',
+    origin: 'http://127.0.0.1:5500',
     credentials: true
 }
 
@@ -22,6 +23,7 @@ app.use(cors(corsOptions)) // CORS 설정
 app.use(express.json()) // request body 파싱
 app.use(express.urlencoded({ extended: false }))
 app.use(logger('tiny')) // Logger 설정 
+app.use(cookieParser()) // 쿠키 설정
 
 app.use('/api/users', usersRouter) // User 라우터
 app.use('/api/todos', todosRouter) // Todo 라우터
