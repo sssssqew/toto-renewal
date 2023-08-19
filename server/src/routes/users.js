@@ -118,6 +118,7 @@ router.post('/logout', limitUsage, isAuth, expressAsyncHandler(async (req, res, 
 router.put('/', limitUsage, [
   validateUserName(),
   validateUserEmail(),
+  validateUserId(),
   validateUserPassword()
 ], isAuth, expressAsyncHandler(async (req, res, next) => {
   const errors = validationResult(req)
@@ -135,6 +136,7 @@ router.put('/', limitUsage, [
     }else{
       user.name = req.body.name || user.name 
       user.email = req.body.email || user.email
+      user.userId = req.body.userId || user.userId // 사용자 아이디 수정가능
       user.password = req.body.password || user.password
       user.isAdmin = req.body.isAdmin ?? user.isAdmin // req.body.isAdmin 이 null 또는 undefined 인 경우 기존값 사용
       user.lastModifiedAt = new Date() // 수정시각 업데이트

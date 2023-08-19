@@ -104,11 +104,11 @@ router.put('/:id', limitUsage, [
     }else{
       todo.title = req.body.title || todo.title
       todo.description = req.body.description || todo.description
-      todo.isDone = req.body.isDone ?? todo.isDone
+      todo.isDone = req.body.isDone ?? todo.isDone // req.body.isDone 이 null 또는 undefined 인 경우 기존값 사용
       todo.category = req.body.category || todo.category
       todo.imgUrl = req.body.imgUrl || todo.imgUrl
       todo.lastModifiedAt = new Date() // 수정시각 업데이트
-      todo.finishedAt = todo.isDone ? todo.lastModifiedAt : todo.finishedAt
+      todo.finishedAt = req.body.isDone ? todo.lastModifiedAt : todo.finishedAt // 사용자가 종료버튼을 클릭하면 현재시각으로 종료시각 업데이트
       
       const updatedTodo = await todo.save()
       res.json({
